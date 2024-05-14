@@ -1,0 +1,12 @@
+.alphabet {
+    font-size: 24px;
+    color: black;
+    font-weight: bold;
+
+}
+
+.letter-link {
+    margin-right: 10px;
+    text-decoration: none;
+    color: #4a6562;
+}

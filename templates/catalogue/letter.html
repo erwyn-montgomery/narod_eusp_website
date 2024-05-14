@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}Cайты на {{ letter }}{% endblock %}
+
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/catalogue/letter.css' %}">{% endblock %}
+
+{% block content %}
+    <form action="{% url 'letter' letter %}" method="get" class="site-form">
+        <div class="entries-dropdown">
+            <label for="entries">Элементов на странице:</label>
+            <select name="entries" id="entries" onchange="this.form.submit()">
+                <option value="25" {% if entries_per_page == '25' %}selected{% endif %}>25</option>
+                <option value="50" {% if entries_per_page == '50' %}selected{% endif %}>50</option>
+                <option value="100" {% if entries_per_page == '100' %}selected{% endif %}>100</option>
+                <option value="200" {% if entries_per_page == '200' %}selected{% endif %}>200</option>
+                <option value="500" {% if entries_per_page == '500' %}selected{% endif %}>500</option>
+                <option value="1000" {% if entries_per_page == '1000' %}selected{% endif %}>1000</option>
+                <option value="10000" {% if entries_per_page == '10000' %}selected{% endif %}>10000</option>
+            </select>
+        </div>
+    </form>
+    <h1>
+        Сохраненные сайты портала Narod.ru на букву: {{ letter }}
+    </h1>
+    {% if page_obj %}
+        <ul>
+            {% for result in page_obj %}
+                <li class="result-item">
+                    {% if result.screenshots.exists %}
+                        {% with screenshot=result.screenshots.first %}
+                            <a href="{% static screenshot.screenshot_path %}" target="_blank">
+                                <img src="{% static screenshot.screenshot_path %}" alt="Screenshot" style="width: auto; height: 100px; margin-right: 20px;">
+                            </a>
+                        {% endwith %}
+                    {% else %}
+                        <div class="placeholder">    
+                            <img src="{% static 'logo/website-click-svgrepo-com.svg' %}" alt="Screenshot" style="width: auto; height: 100px; margin-right: 20px;">
+                        </div>
+                    {% endif %}
+                    <div class="result-info">
+                        <h4><a href="{{ result.site_link }}">{{ result.site_name }}</a></h4>
+                        <p>{{ result.pages.first.page_title }}</p>
+                        <h4><a href="{% url 'site' result.site_id %}">Сохраненные страницы сайта</a></h4>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <h4>К сожалению сайты на букву {{ letter }} еще не сохранены</h4>
+    {% endif %}
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?entries={{ entries_per_page }}&page=1"">&laquo; Первая страница</a>
+                <a href="?entries={{ entries_per_page }}&page={{ page_obj.previous_page_number }}">Предыдущая страница</a>
+            {% endif %}
+    
+            <span class="current">
+                Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+            </span>
+    
+            {% if page_obj.has_next %}
+                <a href="?entries={{ entries_per_page }}&page={{ page_obj.next_page_number }}">Следующая страница</a>
+                <a href="?entries={{ entries_per_page }}&page={{ page_obj.paginator.num_pages }}">Последняя страница &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+{% endblock %}
+    

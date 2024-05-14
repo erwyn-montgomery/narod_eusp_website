@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}Каталог сохраненных сайтов{% endblock %}
+
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/catalogue/alphabet.css' %}">{% endblock %}
+
+{% block content %}
+    <div>
+        <h1>Алфавитный каталог сохраненных сайтов портала Narod.ru</h1>
+    </div>
+    <div class="alphabet">
+        {% for letter in alphabet %}
+            <a href="{% url 'letter' letter %}" class="letter-link">
+                <strong>{{ letter }}</strong>
+            </a>
+        {% endfor %}
+    </div>
+{% endblock %}

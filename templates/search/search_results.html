@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load search_extras %}
+
+{% block title %}Результат поиска{% endblock %}
+
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/search/search_results.css' %}">{% endblock %}
+
+{% block content %}
+    <form action="{% url 'search_results' %}" method="get" class="search-form">
+        {% csrf_token %}
+        <div class="search-controls">
+            <input type="search" name="q" placeholder="Введите текст или ссылку" class="search-input" value="{{ query }}">
+            <input type="submit" value="Поиск" class="search-button">
+        </div>
+        <div class="search-options">
+            <label>
+                <input type="radio" name="search_type" value="text" class="search-radio" {% if search_type == 'text' %}checked{% endif %}>
+                Текстовый поиск
+            </label>
+            <label>
+                <input type="radio" name="search_type" value="url" class="search-radio" {% if search_type == 'url' %}checked{% endif %}>
+                Поиск по ссылке
+            </label>
+        </div>
+        <div class="entries-dropdown">
+            <label for="entries">Элементов на странице:</label>
+            <select name="entries" id="entries" onchange="this.form.submit()">
+                <option value="20" {% if entries_per_page == '20' %}selected{% endif %}>20</option>
+                <option value="40" {% if entries_per_page == '40' %}selected{% endif %}>40</option>
+                <option value="60" {% if entries_per_page == '60' %}selected{% endif %}>60</option>
+                <option value="80" {% if entries_per_page == '80' %}selected{% endif %}>80</option>
+                <option value="100" {% if entries_per_page == '100' %}selected{% endif %}>100</option>
+                <option value="200" {% if entries_per_page == '200' %}selected{% endif %}>200</option>
+                <option value="500" {% if entries_per_page == '500' %}selected{% endif %}>500</option>
+                <option value="1000" {% if entries_per_page == '1000' %}selected{% endif %}>1000</option>
+                <option value="10000" {% if entries_per_page == '10000' %}selected{% endif %}>10000</option>
+            </select>
+        </div>
+    </form>
+    <h1>Результаты поиска: {{ query }}</h1>
+    {% if results %}
+        <div>
+            <ul>
+                {% for result in page_obj %}
+                    {% if result|get_model_name == 'page' %}
+                        <li class="result-item">
+                            {% if result.site.screenshots.exists %}
+                                {% with screenshot=result.site.screenshots.first %}
+                                    <a href="{% static screenshot.screenshot_path %}" target="_blank">
+                                        <img src="{% static screenshot.screenshot_path %}" alt="Screenshot" style="width: auto; height: 100px; margin-right: 20px;">
+                                    </a>
+                                {% endwith %}
+                            {% else %}
+                                <div class="placeholder">    
+                                    <img src="{% static 'logo/website-click-svgrepo-com.svg' %}" alt="Screenshot" style="width: auto; height: 100px; margin-right: 20px;">
+                                </div>
+                            {% endif %}
+                            <div class="result-info">
+                                <h4><a href="{% static result.page_file %}">{{ result.page_title }}</a></h4>
+                                <p>Оригинальная ссылка: <a href="{{ result.page_link }}">{{ result.page_link }}</a></p>
+                                <p>Текст</p>
+                            </div>
+                        </li>
+                    {% elif result|get_model_name == 'site' %}
+                        <li class="result-item">
+                            {% if result.screenshots.exists %}
+                                {% with screenshot=result.screenshots.first %}
+                                    <a href="{% static screenshot.screenshot_path %}" target="_blank">
+                                        <img src="{% static screenshot.screenshot_path %}" alt="Screenshot" style="width: auto; height: 100px; margin-right: 20px;">
+                                    </a>
+                                {% endwith %}
+                            {% else %}
+                                <div class="placeholder">    
+                                   <img src="{% static 'logo/website-click-svgrepo-com.svg' %}" alt="Screenshot" style="width: auto; height: 100px; margin-right: 20px;">
+                                </div>
+                            {% endif %}
+                            <div class="result-info">
+                                <h4><a href="{% static result.pages.first.page_file %}">{{ result.pages.first.page_title }}</a></h4>
+                                <p>Оригинальная ссылка: <a href="{{ result.site_link }}">{{ result.site_link }}</a></p>
+                            </div>
+                        </li>
+                    {% elif result|get_model_name == 'file' %}
+                        <li class="result-item">
+                            <div class="placeholder">
+                                <img src="{% static 'logo/document-svgrepo-com.svg' %}" alt="Screenshot" style="width: auto; height: 100px; margin-right: 20px;">
+                            </div>
+                            <div class="result-info">
+                                <h4><a href="{% static result.file_path %}">{{ result.file_link }}</a></h4>
+                                <p>Оригинальная ссылка: <a href="{{ result.file_link }}">{{ result.file_link }}</a></p>
+                            </div>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+            <div class="pagination">
+                <span class="step-links">
+                    {% if page_obj.has_previous %}
+                        <a href="?q={{ query }}&search_type={{ search_type }}&entries={{ entries_per_page }}&page=1"">&laquo; Первая страница</a>
+                        <a href="?q={{ query }}&search_type={{ search_type }}&entries={{ entries_per_page }}&page={{ page_obj.previous_page_number }}">Предыдущая страница</a>
+                    {% endif %}
+            
+                    <span class="current">
+                        Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+                    </span>
+            
+                    {% if page_obj.has_next %}
+                        <a href="?q={{ query }}&search_type={{ search_type }}&entries={{ entries_per_page }}&page={{ page_obj.next_page_number }}">Следующая страница</a>
+                        <a href="?q={{ query }}&search_type={{ search_type }}&entries={{ entries_per_page }}&page={{ page_obj.paginator.num_pages }}">Последняя страница &raquo;</a>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

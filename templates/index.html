@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}Главная страница – архив Narod.ru{% endblock %}
+
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/search-form.css' %}">{% endblock %}
+
+{% block content %}
+    <div>
+        <p>
+           <h1>Архив сайтов портала Narod.ru</h1>
+           <div>текст</div>
+        </p>
+    </div>
+    <div>
+        <form action="{% url 'search_results' %}" method="get" class="search-form">
+            {% csrf_token %}
+            <div class="search-controls">
+                <input type="search" name="q" placeholder="Введите текст или ссылку" class="search-input">
+                <input type="submit" value="Поиск" class="search-button">
+            </div>
+            <div class="search-options">
+                <label>
+                    <input type="radio" name="search_type" value="text" class="search-radio" checked>
+                    Текстовый поиск
+                </label>
+                <label>
+                    <input type="radio" name="search_type" value="url" class="search-radio">
+                    Поиск по ссылкам
+                </label>
+            </div>
+        </form>
+    </div>
+{% endblock %}
