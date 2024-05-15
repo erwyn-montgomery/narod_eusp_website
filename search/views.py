@@ -50,17 +50,17 @@ class SearchResults(View):
         ).prefetch_related(
             Prefetch("screenshots", queryset=self.screens_model),
             Prefetch("pages", queryset=self.page_model.order_by("page_id"))
-        )
+        ).distinct()
 
         page_result = self.page_model.filter(
             page_link__icontains=q
         ).select_related("site").prefetch_related(
             Prefetch("site__screenshots", queryset=self.screens_model)
-        )
+        ).distinct()
 
         file_result = self.file_model.filter(
             file_link__icontains=q
-        )
+        ).distinct()
         
         search_result = list(chain(site_result, page_result, file_result))
         return search_result
@@ -168,7 +168,7 @@ class AdvancedSearchResultsView(View):
             Q(pages__page_text__icontains=kwargs["page_text_query"]) &
             Q(pages__files_on_page__file_link__icontains=kwargs["file_link_query"]) &
             q_query
-        )
+        ).distinct()
         return results
 
     def search_page(self, *args, **kwargs):
@@ -186,7 +186,7 @@ class AdvancedSearchResultsView(View):
             Q(page_text__icontains=kwargs["page_text_query"]) &
             Q(files_on_page__file_link__icontains=kwargs["file_link_query"]) &
             q_query
-        )
+        ).distinct()
         return results
 
     def search_file(self, *args, **kwargs):
@@ -201,5 +201,5 @@ class AdvancedSearchResultsView(View):
             Q(page__page_text__icontains=kwargs["page_text_query"]) &
             Q(file_link__icontains=kwargs["file_link_query"]) &
             Q()
-        )
+        ).distinct()
         return results
