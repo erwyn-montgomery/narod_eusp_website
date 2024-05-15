@@ -1,0 +1,19 @@
+.header-container {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.header-container h1 {
+    margin-bottom: 10px;
+}
+
+.intro-text {
+    text-align: left;
+    margin: 0 auto;
+    width: 50%;
+}
+
+.link-container {
+    text-align: center;
+    margin-top: 20px;
+}

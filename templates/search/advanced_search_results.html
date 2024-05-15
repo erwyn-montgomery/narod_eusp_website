@@ -3,26 +3,42 @@
 {% load static %}
 {% load search_extras %}
 
-{% block title %}Результат поиска{% endblock %}
+{% block title %}Результаты расширенного поиска{% endblock %}
 
-{% block extra_css %}<link rel="stylesheet" href="{% static 'css/search/search_results.css' %}">{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/search/advanced_search_results.css' %}">{% endblock %}
 
 {% block content %}
-    <form action="{% url 'search_results' %}" method="get" class="search-form">
-        {% csrf_token %}
-        <div class="search-controls">
-            <input type="search" name="q" placeholder="Введите текст или ссылку" class="search-input" value="{{ query }}">
-            <input type="submit" value="Поиск" class="search-button">
-        </div>
+    <form action="{% url 'advanced_search_results' %}" method="get" class="search-form">
         <div class="search-options">
-            <label>
-                <input type="radio" name="search_type" value="text" class="search-radio" {% if search_type == 'text' %}checked{% endif %}>
-                Текстовый поиск
+            <label class="search-label">Поиск среди</label>
+            <label class="search-label">
+                <input type="checkbox" name="search_type" value="site" class="search-checkbox" {% if 'site' in search_types %}checked{% endif %}>
+                сайтов
             </label>
-            <label>
-                <input type="radio" name="search_type" value="url" class="search-radio" {% if search_type == 'url' %}checked{% endif %}>
-                Поиск по ссылке
+            <label class="search-label">
+                <input type="checkbox" name="search_type" value="page" class="search-checkbox" {% if 'page' in search_types %}checked{% endif %}>
+                страниц
             </label>
+            <label class="search-label">
+                <input type="checkbox" name="search_type" value="file" class="search-checkbox" {% if 'file' in search_types %}checked{% endif %}>
+                файлов
+            </label>
+        </div>
+        <div class="search-controls">
+            <input type="text" name="site_link" placeholder="Фильтр по ссылкам на сайт" class="search-input" value="{{ site_link_query }}">
+            <input type="text" name="page_link" placeholder="Фильтр по ссылкам на страницу" class="search-input" value="{{ page_link_query }}">
+            <input type="text" name="page_title" placeholder="Фильтр по заголовка страницы" class="search-input" value="{{ page_title_query }}">
+            <input type="text" name="page_text" placeholder="Фильтр по тексту страницы" class="search-input" value="{{ page_text_query }}">
+            <input type="text" name="file_link" placeholder="Фильтр по ссылкам на файл" class="search-input" value="{{ file_link_query }}">
+            <label class="file-extension-label">Расширение файла для фильтра по файлам 
+                <select name="file_extension" class="search-select">
+                    <option value="">Любое</option>
+                    {% for extension in file_extensions %}
+                        <option value="{{ extension }}" {% if extension == file_extension_query %}selected{% endif %}>{{ extension }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <input type="submit" value="Поиск" class="search-button">
         </div>
         <div class="entries-dropdown">
             <label for="entries">Элементов на странице:</label>
@@ -39,7 +55,7 @@
             </select>
         </div>
     </form>
-    <h1>Результаты поиска: {{ query }}</h1>
+    <h1>Результаты расширенного поиска:</h1>
     {% if page_obj %}
         <div>
             <ul>
@@ -97,8 +113,8 @@
             <div class="pagination">
                 <span class="step-links">
                     {% if page_obj.has_previous %}
-                        <a href="?q={{ query }}&search_type={{ search_type }}&entries={{ entries_per_page }}&page=1"">&laquo; Первая страница</a>
-                        <a href="?q={{ query }}&search_type={{ search_type }}&entries={{ entries_per_page }}&page={{ page_obj.previous_page_number }}">Предыдущая страница</a>
+                        <a href="?search_type={{ search_types|join:'&search_type=' }}&entries={{ entries_per_page }}&site_link={{ site_link_query }}&page_link={{ page_link_query }}&page_title={{ page_title_query }}&page_text={{ page_text_query }}&file_link={{ file_link_query }}&file_extension={{ file_extension_query }}&page=1">&laquo; Первая страница</a>
+                        <a href="?search_type={{ search_types|join:'&search_type=' }}&entries={{ entries_per_page }}&site_link={{ site_link_query }}&page_link={{ page_link_query }}&page_title={{ page_title_query }}&page_text={{ page_text_query }}&file_link={{ file_link_query }}&file_extension={{ file_extension_query }}&page={{ page_obj.previous_page_number }}">Предыдущая страница</a>
                     {% endif %}
             
                     <span class="current">
@@ -106,8 +122,8 @@
                     </span>
             
                     {% if page_obj.has_next %}
-                        <a href="?q={{ query }}&search_type={{ search_type }}&entries={{ entries_per_page }}&page={{ page_obj.next_page_number }}">Следующая страница</a>
-                        <a href="?q={{ query }}&search_type={{ search_type }}&entries={{ entries_per_page }}&page={{ page_obj.paginator.num_pages }}">Последняя страница &raquo;</a>
+                        <a href="?search_type={{ search_types|join:'&search_type=' }}&entries={{ entries_per_page }}&site_link={{ site_link_query }}&page_link={{ page_link_query }}&page_title={{ page_title_query }}&page_text={{ page_text_query }}&file_link={{ file_link_query }}&file_extension={{ file_extension_query }}&page={{ page_obj.next_page_number }}">Следующая страница</a>
+                        <a href="?search_type={{ search_types|join:'&search_type=' }}&entries={{ entries_per_page }}&site_link={{ site_link_query }}&page_link={{ page_link_query }}&page_title={{ page_title_query }}&page_text={{ page_text_query }}&file_link={{ file_link_query }}&file_extension={{ file_extension_query }}&page={{ page_obj.paginator.num_pages }}">Последняя страница &raquo;</a>
                     {% endif %}
                 </span>
             </div>

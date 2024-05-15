@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}Главная страница – архив Narod.ru{% endblock %}
+
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/search/advanced_search.css' %}">{% endblock %}
+
+{% block content %}
+    <div class="header-container">
+        <h1>Расширенный поиск</h1>
+    </div>
+    <div>
+        <form action="{% url 'advanced_search_results' %}" method="get" class="search-form">
+            <div class="search-options">
+                <label class="search-label">Поиск среди</label>
+                <label class="search-label">
+                    <input type="checkbox" name="search_type" value="site" class="search-checkbox">
+                    сайтов
+                </label>
+                <label class="search-label">
+                    <input type="checkbox" name="search_type" value="page" class="search-checkbox">
+                    страниц
+                </label>
+                <label class="search-label">
+                    <input type="checkbox" name="search_type" value="file" class="search-checkbox">
+                    файлов
+                </label>
+            </div>
+            <div class="search-controls">
+                <input type="text" name="site_link" placeholder="Фильтр по ссылкам сайтов" class="search-input">
+                <input type="text" name="page_link" placeholder="Фильтр по ссылкам страниц" class="search-input">
+                <input type="text" name="page_title" placeholder="Фильтр по заголовкам страниц" class="search-input">
+                <input type="text" name="page_text" placeholder="Фильтр по тексту страниц" class="search-input">
+                <input type="text" name="file_link" placeholder="Фильтр по ссылкам на файл" class="search-input">
+                <label class="file-extension-label">Расширение файла для фильтра по файлам
+                    <select name="file_extension" class="search-select">
+                        <option value="">Любое</option>
+                        {% for extension in file_extensions %}
+                            <option value="{{ extension }}">{{ extension }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+            <div class="search-button-container">
+                <input type="submit" value="Поиск" class="search-button">
+            </div>
+        </form>
+        
+    </div>
+{% endblock %}

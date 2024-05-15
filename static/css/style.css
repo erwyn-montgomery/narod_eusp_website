@@ -1,11 +1,9 @@
-/* Basic reset */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* Body */
 body {
     font-family: Arial, sans-serif;
     line-height: 1.6;
@@ -17,7 +15,6 @@ body {
     min-height: 100vh;
 }
 
-/* Header */
 header {
     background: #333;
     color: #fff;
@@ -50,7 +47,6 @@ header nav ul li a:hover {
     text-decoration: underline;
 }
 
-/* Main content */
 main {
     padding: 20px;
     width: 90%;
@@ -62,7 +58,6 @@ main {
     flex: 1;
 }
 
-/* Footer */
 footer {
     background: #333;
     color: #fff;
