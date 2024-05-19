@@ -163,7 +163,7 @@ class File(models.Model):
 
 class FileMetaInfo(models.Model):
     file_meta_id = models.BigIntegerField(primary_key=True)
-    file = models.ForeignKey(File, on_delete=models.CASCADE)
+    file = models.ForeignKey(File, on_delete=models.CASCADE, related_name="files")
     size = models.BigIntegerField(blank=True, null=True)
     size_h = models.TextField(blank=True, null=True)
     modification_date = models.TextField(blank=True, null=True)
