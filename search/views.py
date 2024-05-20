@@ -20,10 +20,23 @@ class SearchResults(View):
         search_page = request.GET.get("page", 1)
         entries_per_page = request.GET.get('entries', 20)
 
-        if search_type == "url":
-            search_result = self.search_url(search_query)
+        if (
+            "previous_search_query" not in request.session or
+            "previous_search_type" not in request.session or
+            search_query != request.session["previous_search_query"] or
+            search_type != request.session["previous_search_type"]
+        ):
+            request.session.flush()
+            if search_type == "url":
+                search_result = self.search_url(search_query)
+            else:
+                search_result = self.search_text(search_query)
+            request.session["search_results_pks"] = [(result._meta.model_name, result.pk) for result in search_result]
+            request.session["previous_search_query"] = search_query
+            request.session["previous_search_type"] = search_type
         else:
-            search_result = self.search_text(search_query)
+            pks = request.session["search_results_pks"]
+            search_result = [self.get_result_by_pk(pk) for pk in pks]
 
         search_result_paged = Paginator(search_result, entries_per_page)
         page_obj = search_result_paged.get_page(search_page)
@@ -65,6 +78,19 @@ class SearchResults(View):
         search_result = list(chain(site_result, page_result, file_result))
         return search_result
     
+    def get_result_by_pk(self, pk):
+        if pk[0] == "site":
+            result = self.site_model.get(pk=pk[1])
+            return result
+
+        if pk[0] == "page":
+            result = self.page_model.get(pk=pk[1])
+            return result
+
+        if pk[0] == "file":
+            result = self.file_model.get(pk=pk[1])
+            return result
+    
 
 class AdvancedSearchView(View):
     file_model = File.objects.all()
@@ -84,8 +110,6 @@ class AdvancedSearchResultsView(View):
 
     def get(self, request, *args, **kwargs):
         site_link_query = request.GET.get('site_link', '').strip()
-        page_link_query = request.GET.get('page_link', '').strip()
-        page_title_query = request.GET.get('page_title', '').strip()
         page_text_query = request.GET.get('page_text', '').strip()
         file_link_query = request.GET.get('file_link', '').strip()
         file_extension_query = request.GET.get('file_extension', '')
@@ -97,41 +121,44 @@ class AdvancedSearchResultsView(View):
         page_results = self.page_model.none()
         file_results = self.file_model.none()
 
-        if 'site' in search_types:
-            site_results = self.search_site(
-                site_link_query = site_link_query,
-                page_link_query = page_link_query,
-                page_title_query = page_title_query,
-                page_text_query = page_text_query,
-                file_link_query = file_link_query,
-                file_extension_query = file_extension_query
-            )
-
-        if 'page' in search_types:
-            page_results = self.search_page(
-                site_link_query = site_link_query,
-                page_link_query = page_link_query,
-                page_title_query = page_title_query,
-                page_text_query = page_text_query,
-                file_link_query = file_link_query,
-                file_extension_query = file_extension_query
-            )
-
-        if 'file' in search_types:
-            file_results = self.search_file(
-                site_link_query = site_link_query,
-                page_link_query = page_link_query,
-                page_title_query = page_title_query,
-                page_text_query = page_text_query,
-                file_link_query = file_link_query,
-                file_extension_query = file_extension_query
-            )
-
-        print("Site results count:", site_results.count())
-        print("Page results count:", page_results.count())
-        print("File results count:", file_results.count())
-
-        search_results = list(chain(site_results, page_results, file_results))
+        if (
+            "previous_site_link_query" not in request.session or
+            "previous_page_text_query" not in request.session or
+            "previous_file_link_query" not in request.session or
+            "previous_file_extension_query" not in request.session or
+            "previous_search_types" not in request.session or
+            site_link_query != request.session["previous_site_link_query"] or
+            page_text_query != request.session["previous_page_text_query"] or
+            file_link_query != request.session["previous_file_link_query"] or
+            file_extension_query != request.session["previous_file_extension_query"] or
+            search_types != request.session["previous_search_types"]
+        ):
+            request.session.flush()
+            if 'site' in search_types:
+                site_results = self.search_site(
+                    site_link_query = site_link_query,
+                    page_text_query = page_text_query,
+                    file_link_query = file_link_query,
+                    file_extension_query = file_extension_query
+                )
+            if 'page' in search_types:
+                page_results = self.search_page(
+                    site_link_query = site_link_query,
+                    page_text_query = page_text_query,
+                    file_link_query = file_link_query,
+                    file_extension_query = file_extension_query
+                )
+            if 'file' in search_types:
+                file_results = self.search_file(
+                    site_link_query = site_link_query,
+                    page_text_query = page_text_query,
+                    file_link_query = file_link_query,
+                    file_extension_query = file_extension_query
+                )
+            search_results = list(chain(site_results, page_results, file_results))
+        else:
+            pks = request.session["search_results_pks"]
+            search_results = [self.get_result_by_pk(pk) for pk in pks]
 
         search_result_paged = Paginator(search_results, entries_per_page)
         page_obj = search_result_paged.get_page(search_page)
@@ -143,8 +170,6 @@ class AdvancedSearchResultsView(View):
             "file_extensions": file_extensions,
             "entries_per_page": entries_per_page,
             "site_link_query": site_link_query,
-            "page_link_query": page_link_query,
-            "page_title_query": page_title_query,
             "page_text_query": page_text_query,
             "file_link_query": file_link_query,
             "file_extension_query": file_extension_query,
@@ -163,9 +188,7 @@ class AdvancedSearchResultsView(View):
             ))
         ).filter(
             Q(site_link__icontains=kwargs["site_link_query"]) &
-            Q(pages__page_link__icontains=kwargs["page_link_query"]) &
-            Q(pages__page_title__icontains=kwargs["page_title_query"]) &
-            Q(pages__page_text__icontains=kwargs["page_text_query"]) &
+            ( Q(pages__page_title__icontains=kwargs["page_text_query"]) | Q(pages__page_text__icontains=kwargs["page_text_query"]) ) &
             Q(pages__files_on_page__file_link__icontains=kwargs["file_link_query"]) &
             q_query
         ).distinct()
@@ -181,9 +204,7 @@ class AdvancedSearchResultsView(View):
                 Prefetch("site__screenshots", queryset=self.screens_model)
         ).filter(
             Q(site__site_link__icontains=kwargs["site_link_query"]) &
-            Q(page_link__icontains=kwargs["page_link_query"]) &
-            Q(page_title__icontains=kwargs["page_title_query"]) &
-            Q(page_text__icontains=kwargs["page_text_query"]) &
+            ( Q(page_title__icontains=kwargs["page_text_query"]) | Q(page_text__icontains=kwargs["page_text_query"]) ) &
             Q(files_on_page__file_link__icontains=kwargs["file_link_query"]) &
             q_query
         ).distinct()
@@ -196,10 +217,21 @@ class AdvancedSearchResultsView(View):
             q_query = Q()
         results = self.file_model.select_related("page").select_related("page__site").filter(
             Q(page__site__site_link__icontains=kwargs["site_link_query"]) &
-            Q(page__page_link__icontains=kwargs["page_link_query"]) &
-            Q(page__page_title__icontains=kwargs["page_title_query"]) &
-            Q(page__page_text__icontains=kwargs["page_text_query"]) &
+            ( Q(page__page_title__icontains=kwargs["page_text_query"]) | Q(page__page_text__icontains=kwargs["page_text_query"]) ) &
             Q(file_link__icontains=kwargs["file_link_query"]) &
             Q()
         ).distinct()
         return results
+    
+    def get_result_by_pk(self, pk):
+        if pk[0] == "site":
+            result = self.site_model.get(pk=pk[1])
+            return result
+
+        if pk[0] == "page":
+            result = self.page_model.get(pk=pk[1])
+            return result
+
+        if pk[0] == "file":
+            result = self.file_model.get(pk=pk[1])
+            return result
