@@ -7,7 +7,7 @@
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
 from django.contrib.postgres.indexes import GinIndex
-from django.contrib.postgres.search import SearchVectorField
+from django.contrib.postgres.search import SearchVectorField, SearchVector
 import re
 
 
@@ -213,12 +213,20 @@ class Page(models.Model):
     page_text = models.TextField(blank=True, null=True)
     page_file_saved = models.BooleanField(default=False)
     page_file = models.TextField(blank=True, null=True)
+    page_fts_text = SearchVectorField(null=True)
+
+    def save(self, *args, **kwargs):
+        self.page_fts_text = SearchVector('page_text')
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Страница"
         verbose_name_plural = "Страницы"
         managed = False
         db_table = 'page'
+        indexes = [
+            models.Index(fields=['page_fts_text'], name='page_fts_text_idx')
+        ]
 
 
 class PageScreenshot(models.Model):

@@ -12,23 +12,23 @@
         <div class="search-options">
             <label class="search-label">Поиск среди</label>
             <label class="search-label">
-                <input type="checkbox" name="search_type" value="site" class="search-checkbox" {% if 'site' in search_types %}checked{% endif %}>
+                <input type="radio" name="search_type" value="site" class="search-radio" {% if search_type == 'site' %}checked{% endif %}>
                 сайтов
             </label>
             <label class="search-label">
-                <input type="checkbox" name="search_type" value="page" class="search-checkbox" {% if 'page' in search_types %}checked{% endif %}>
+                <input type="radio" name="search_type" value="page" class="search-radio" {% if search_type == 'page' %}checked{% endif %}>
                 страниц
             </label>
             <label class="search-label">
-                <input type="checkbox" name="search_type" value="file" class="search-checkbox" {% if 'file' in search_types %}checked{% endif %}>
+                <input type="radio" name="search_type" value="file" class="search-radio" {% if search_type == 'file' %}checked{% endif %}>
                 файлов
             </label>
         </div>
         <div class="search-controls">
-            <input type="text" name="site_link" placeholder="Фильтр по ссылкам на сайт" class="search-input" value="{{ site_link_query }}">
-            <input type="text" name="page_text" placeholder="Фильтр по тексту и заголовкам страницы" class="search-input" value="{{ page_text_query }}">
-            <input type="text" name="file_link" placeholder="Фильтр по ссылкам на файл" class="search-input" value="{{ file_link_query }}">
-            <label class="file-extension-label">Расширение файла для фильтра по файлам 
+            <input type="text" name="site_link" placeholder="Поиск по ссылкам на сайт" class="search-input" value="{{ site_link_query }}">
+            <input type="text" name="page_text" placeholder="Поиск по тексту и заголовкам страницы" class="search-input" value="{{ page_text_query }}">
+            <input type="text" name="file_link" placeholder="Поиск по ссылкам на файл" class="search-input" value="{{ file_link_query }}">
+            <label class="file-extension-label">Расширение файла для поиска по по файлам 
                 <select name="file_extension" class="search-select">
                     <option value="">Любое</option>
                     {% for extension in file_extensions %}
@@ -74,7 +74,7 @@
                             <div class="result-info">
                                 <h4><a href="{% static result.page_file %}">{{ result.page_title }}</a></h4>
                                 <p>Оригинальная ссылка: <a href="{{ result.page_link }}">{{ result.page_link }}</a></p>
-                                <p>Текст</p>
+                                {% if result.search_headline %}<p>{{ result.search_headline|safe }}</p>{% endif %}
                             </div>
                         </li>
                     {% elif result|get_model_name == 'site' %}
@@ -111,8 +111,8 @@
             <div class="pagination">
                 <span class="step-links">
                     {% if page_obj.has_previous %}
-                        <a href="?search_type={{ search_types|join:'&search_type=' }}&entries={{ entries_per_page }}&site_link={{ site_link_query }}&page_link={{ page_link_query }}&page_title={{ page_title_query }}&page_text={{ page_text_query }}&file_link={{ file_link_query }}&file_extension={{ file_extension_query }}&page=1">&laquo; Первая страница</a>
-                        <a href="?search_type={{ search_types|join:'&search_type=' }}&entries={{ entries_per_page }}&site_link={{ site_link_query }}&page_link={{ page_link_query }}&page_title={{ page_title_query }}&page_text={{ page_text_query }}&file_link={{ file_link_query }}&file_extension={{ file_extension_query }}&page={{ page_obj.previous_page_number }}">Предыдущая страница</a>
+                        <a href="?search_type={{ search_type }}&entries={{ entries_per_page }}&site_link={{ site_link_query }}&page_link={{ page_link_query }}&page_title={{ page_title_query }}&page_text={{ page_text_query }}&file_link={{ file_link_query }}&file_extension={{ file_extension_query }}&page=1">&laquo; Первая страница</a>
+                        <a href="?search_type={{ search_type }}&entries={{ entries_per_page }}&site_link={{ site_link_query }}&page_link={{ page_link_query }}&page_title={{ page_title_query }}&page_text={{ page_text_query }}&file_link={{ file_link_query }}&file_extension={{ file_extension_query }}&page={{ page_obj.previous_page_number }}">Предыдущая страница</a>
                     {% endif %}
             
                     <span class="current">
@@ -120,8 +120,8 @@
                     </span>
             
                     {% if page_obj.has_next %}
-                        <a href="?search_type={{ search_types|join:'&search_type=' }}&entries={{ entries_per_page }}&site_link={{ site_link_query }}&page_link={{ page_link_query }}&page_title={{ page_title_query }}&page_text={{ page_text_query }}&file_link={{ file_link_query }}&file_extension={{ file_extension_query }}&page={{ page_obj.next_page_number }}">Следующая страница</a>
-                        <a href="?search_type={{ search_types|join:'&search_type=' }}&entries={{ entries_per_page }}&site_link={{ site_link_query }}&page_link={{ page_link_query }}&page_title={{ page_title_query }}&page_text={{ page_text_query }}&file_link={{ file_link_query }}&file_extension={{ file_extension_query }}&page={{ page_obj.paginator.num_pages }}">Последняя страница &raquo;</a>
+                        <a href="?search_type={{ search_type }}&entries={{ entries_per_page }}&site_link={{ site_link_query }}&page_link={{ page_link_query }}&page_title={{ page_title_query }}&page_text={{ page_text_query }}&file_link={{ file_link_query }}&file_extension={{ file_extension_query }}&page={{ page_obj.next_page_number }}">Следующая страница</a>
+                        <a href="?search_type={{ search_type }}&entries={{ entries_per_page }}&site_link={{ site_link_query }}&page_link={{ page_link_query }}&page_title={{ page_title_query }}&page_text={{ page_text_query }}&file_link={{ file_link_query }}&file_extension={{ file_extension_query }}&page={{ page_obj.paginator.num_pages }}">Последняя страница &raquo;</a>
                     {% endif %}
                 </span>
             </div>

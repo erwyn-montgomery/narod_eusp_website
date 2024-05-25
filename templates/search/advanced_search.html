@@ -15,27 +15,27 @@
             <div class="search-options">
                 <label class="search-label">Поиск среди</label>
                 <label class="search-label">
-                    <input type="checkbox" name="search_type" value="site" class="search-checkbox">
+                    <input type="radio" name="search_type" value="site" class="search-radio" {% if search_type == 'site' %}checked{% endif %}>
                     сайтов
                 </label>
                 <label class="search-label">
-                    <input type="checkbox" name="search_type" value="page" class="search-checkbox">
+                    <input type="radio" name="search_type" value="page" class="search-radio" {% if search_type == 'page' or search_type != 'site' and search_type != 'file' %}checked{% endif %}>
                     страниц
                 </label>
                 <label class="search-label">
-                    <input type="checkbox" name="search_type" value="file" class="search-checkbox">
+                    <input type="radio" name="search_type" value="file" class="search-radio" {% if search_type == 'file' %}checked{% endif %}>
                     файлов
                 </label>
             </div>
             <div class="search-controls">
-                <input type="text" name="site_link" placeholder="Фильтр по ссылкам сайтов" class="search-input">
-                <input type="text" name="page_text" placeholder="Фильтр по тексту и заголовкам страниц" class="search-input">
-                <input type="text" name="file_link" placeholder="Фильтр по ссылкам на файл" class="search-input">
-                <label class="file-extension-label">Расширение файла для фильтра по файлам
+                <input type="text" name="site_link" placeholder="Поиск по ссылкам сайтов" class="search-input" value="{{ site_link_query }}">
+                <input type="text" name="page_text" placeholder="Поиск по тексту и заголовкам страниц" class="search-input" value="{{ page_text_query }}">
+                <input type="text" name="file_link" placeholder="Поиск по ссылкам на файл" class="search-input" value="{{ file_link_query }}">
+                <label class="file-extension-label">Расширение файла для поиска по файлам
                     <select name="file_extension" class="search-select">
                         <option value="">Любое</option>
                         {% for extension in file_extensions %}
-                            <option value="{{ extension }}">{{ extension }}</option>
+                            <option value="{{ extension }}" {% if extension != None and extension == file_extension_query %}selected{% endif %}>{{ extension }}</option>
                         {% endfor %}
                     </select>
                 </label>

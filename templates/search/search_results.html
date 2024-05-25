@@ -60,7 +60,7 @@
                             <div class="result-info">
                                 <h4><a href="{% static result.page_file %}">{{ result.page_title }}</a></h4>
                                 <p>Оригинальная ссылка: <a href="{{ result.page_link }}">{{ result.page_link }}</a></p>
-                                <p>Текст</p>
+                                {% if search_type == 'text' %}<p>{{ result.headline|safe }}</p>{% endif %}
                             </div>
                         </li>
                     {% elif result|get_model_name == 'site' %}
