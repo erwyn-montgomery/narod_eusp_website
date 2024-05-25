@@ -5,6 +5,7 @@ from narod.models import Page, Site, File, MainPageScreenshot
 from django.core.paginator import Paginator
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchHeadline, TrigramSimilarity
 from django.db.models.functions import Coalesce
+from django.core.cache import cache
 
 
 # Create your views here.
@@ -20,11 +21,16 @@ class SearchResults(View):
         search_type = request.GET.get("search_type", "text")
         search_page = request.GET.get("page", 1)
         entries_per_page = request.GET.get('entries', 20)
+
+        cache_key = f"queryset_search_query={search_query}_search_type={search_type}"
+        search_result = cache.get(cache_key)
         
-        if search_type == "url":
-            search_result = self.search_url(search_query)
-        else:
-            search_result = self.search_text(search_query)
+        if not search_result:
+            if search_type == "url":
+                search_result = self.search_url(search_query)
+            else:
+                search_result = self.search_text(search_query)
+            cache.set(cache_key, search_result, timeout=60*10)
 
         search_result_paged = Paginator(search_result, entries_per_page)
         page_obj = search_result_paged.get_page(search_page)
@@ -88,29 +94,34 @@ class AdvancedSearchResultsView(View):
         search_page = request.GET.get("page", 1)
         entries_per_page = request.GET.get('entries', 20)
 
-        if search_type == "site":
-            search_results = self.search_site(
-                site_link_query = site_link_query,
-                page_text_query = page_text_query,
-                file_link_query = file_link_query,
-                file_extension_query = file_extension_query
-            )
-        elif search_type == "page":
-            search_results = self.search_page(
-                site_link_query = site_link_query,
-                page_text_query = page_text_query,
-                file_link_query = file_link_query,
-                file_extension_query = file_extension_query
-            )
-        elif search_type == "file":
-            search_results = self.search_file(
-                site_link_query = site_link_query,
-                page_text_query = page_text_query,
-                file_link_query = file_link_query,
-                file_extension_query = file_extension_query
-            )
-        else:
-            search_results = None
+        cache_key = f"queryset_slquery={site_link_query}_ptquery={page_text_query}_flquery={file_link_query}_fequery={file_extension_query}_stype={search_type}"
+        search_results = cache.get(cache_key)
+
+        if not search_results:
+            if search_type == "site":
+                search_results = self.search_site(
+                    site_link_query = site_link_query,
+                    page_text_query = page_text_query,
+                    file_link_query = file_link_query,
+                    file_extension_query = file_extension_query
+                )
+            elif search_type == "page":
+                search_results = self.search_page(
+                    site_link_query = site_link_query,
+                    page_text_query = page_text_query,
+                    file_link_query = file_link_query,
+                    file_extension_query = file_extension_query
+                )
+            elif search_type == "file":
+                search_results = self.search_file(
+                    site_link_query = site_link_query,
+                    page_text_query = page_text_query,
+                    file_link_query = file_link_query,
+                    file_extension_query = file_extension_query
+                )
+            else:
+                search_results = None
+            cache.set(cache_key, search_results, timeout=60*10)  
 
         search_result_paged = Paginator(search_results, entries_per_page)
         page_obj = search_result_paged.get_page(search_page)
