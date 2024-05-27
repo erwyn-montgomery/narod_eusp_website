@@ -98,7 +98,7 @@
 .additional-filters {
     display: none;
     margin-top: 10px;
-    width: 70%; /* Align width with other inputs */
+    width: 70%;
 }
 
 .hidden-checkbox:checked + .additional-filters {
@@ -116,13 +116,13 @@
 
 .form-group {
     margin-bottom: 10px;
-    width: 100%; /* Full width for consistency */
+    width: 100%;
 }
 
 .form-group label {
     display: block;
     margin-bottom: 5px;
-    font-size: 16px; /* Match other labels */
+    font-size: 16px;
     color: #333;
 }
 
