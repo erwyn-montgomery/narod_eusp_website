@@ -9,7 +9,6 @@
 
 {% block content %}
     <form action="{% url 'search_results' %}" method="get" class="search-form">
-        {% csrf_token %}
         <div class="search-controls">
             <input type="search" name="q" placeholder="Введите текст или ссылку" class="search-input" value="{{ query }}">
             <input type="submit" value="Поиск" class="search-button">

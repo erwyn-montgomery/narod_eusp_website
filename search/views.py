@@ -22,7 +22,7 @@ class SearchResults(View):
         search_page = request.GET.get("page", 1)
         entries_per_page = request.GET.get('entries', 20)
 
-        cache_key = f"queryset_search_query={search_query}_search_type={search_type}"
+        cache_key = f'queryset_{(hash(f"search_query={search_query}_search_type={search_type}"))}'
         search_result = cache.get(cache_key)
         
         if not search_result:
@@ -94,7 +94,7 @@ class AdvancedSearchResultsView(View):
         search_page = request.GET.get("page", 1)
         entries_per_page = request.GET.get('entries', 20)
 
-        cache_key = f"queryset_slquery={site_link_query}_ptquery={page_text_query}_flquery={file_link_query}_fequery={file_extension_query}_stype={search_type}"
+        cache_key = f'queryset_{hash(f"slquery={site_link_query}_ptquery={page_text_query}_flquery={file_link_query}_fequery={file_extension_query}_stype={search_type}")}'
         search_results = cache.get(cache_key)
 
         if not search_results:

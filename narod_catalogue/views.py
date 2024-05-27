@@ -28,8 +28,7 @@ class LetterView(View):
             sites = get_list_or_404(self.site_model.filter(
                 site_link__icontains=f'http://{letter.lower()}'
             ).order_by("site_link").prefetch_related(
-                Prefetch("pages", queryset=self.page_model.order_by("page_id")),
-                Prefetch("screenshots", queryset=self.screens_model)
+                Prefetch("pages", queryset=self.page_model.order_by("page_id"))
             ))
             cache.set(cache_key, sites, timeout=60*10)
         sites_page = request.GET.get("page", 1)
