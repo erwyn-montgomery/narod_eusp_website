@@ -26,16 +26,71 @@
         </div>
         <div class="search-controls">
             <input type="text" name="site_link" placeholder="Поиск по ссылкам на сайт" class="search-input" value="{{ site_link_query }}">
-            <input type="text" name="page_text" placeholder="Поиск по тексту и заголовкам страницы" class="search-input" value="{{ page_text_query }}">
+            <input type="text" name="page_title" placeholder="Поиск по заголовкам страниц" class="search-input" value="{{ page_title_query }}">
+            <input type="text" name="page_text" placeholder="Поиск по тексту страниц" class="search-input" value="{{ page_text_query }}">
             <input type="text" name="file_link" placeholder="Поиск по ссылкам на файл" class="search-input" value="{{ file_link_query }}">
-            <label class="file-extension-label">Расширение файла для поиска по по файлам 
-                <select name="file_extension" class="search-select">
-                    <option value="">Любое</option>
-                    {% for extension in file_extensions %}
-                        <option value="{{ extension }}" {% if extension == file_extension_query %}selected{% endif %}>{{ extension }}</option>
+        </div>
+        <label class="toggle-label" for="toggle-advanced-search">Дополнительные параметры</label>
+        <input type="checkbox" class="hidden-checkbox" id="toggle-advanced-search">
+        <div class="additional-filters">
+            <div class="form-group form-inline">
+                <label for="pages_more_than">Количество страниц на сайте:</label>
+                <input type="number" id="pages_more_than" name="pages_more_than" class="search-input short-input" placeholder="число" value="{{ pages_more_than }}">
+                <span> ≤ &nbsp; число страниц &nbsp; ≤ </span>
+                <input type="number" id="pages_less_than" name="pages_less_than" class="search-input short-input" placeholder="число" value="{{ pages_less_than }}">
+            </div>
+            <div class="form-group">
+                <label class="file-extension-label">Расширение файла
+                    <select name="file_extension" class="search-select">
+                        <option value="">любое</option>
+                        {% for extension in file_extensions %}
+                            <option value="{{ extension }}" {% if extension != None and extension == file_extension_query %}selected{% endif %}>{{ extension }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+            <div class="form-group">
+                <input type="text" id="document_text" name="document_text" placeholder="Поиск по тексту документов" class="search-input" value="{{ doc_text_query }}">
+            </div>
+            <div class="form-group form-inline">
+                <label for="image_height">Высота изображения в пикселях:</label>
+                <input type="number" id="image_height_more_than" name="image_height_more_than" class="search-input short-input" placeholder="число" value="{{ image_height_more_than }}">
+                <span> ≤ высота ≤ </span>
+                <input type="number" id="image_height_less_than" name="image_height_less_than" class="search-input short-input" placeholder="число" value="{{ image_height_less_than }}">
+            </div>
+            <div class="form-group form-inline">
+                <label for="image_width">Ширина изображения в пикселях:</label>
+                <input type="number" id="image_width_more_than" name="image_width_more_than" class="search-input short-input" placeholder="число" value="{{ image_width_more_than }}">
+                <span> ≤ ширина ≤ </span>
+                <input type="number" id="image_width_less_than" name="image_width_less_than" class="search-input short-input" placeholder="число" value="{{ image_width_less_than }}">
+            </div>
+            <div class="form-group">
+                <label for="device_make">Бренд устройства съемки (для поиска по изображениям)</label>
+                <select id="device_make" name="device_make" class="search-select wide-select">
+                    <option value="">любой</option>
+                    {% for make in exif_makes %}
+                            <option value="{{ make }}" {% if make != None and make == device_make %}selected{% endif %}>{{ make }}</option>
                     {% endfor %}
                 </select>
-            </label>
+            </div>
+            <div class="form-group">
+                <label for="device_model">Модель устройства съемки (для поиска по изображениям)</label>
+                <select id="device_model" name="device_model" class="search-select wide-select">
+                    <option value="">любая</option>
+                    {% for model in exif_models %}
+                            <option value="{{ model }}" {% if model != None and make == device_model %}selected{% endif %}>{{ model }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group form-inline">
+                <label for="date_from">Дата съемки (для поиска по изображениям)</label>
+                <label for="date_from">с</label>
+                <input type="date" id="date_from" name="date_from" class="search-input" value="{{ date_from }}">
+                <label for="date_to">по</label>
+                <input type="date" id="date_to" name="date_to" class="search-input" value="{{ date_to }}">
+            </div>
+        </div>
+        <div class="search-button-container">
             <input type="submit" value="Поиск" class="search-button">
         </div>
         <div class="entries-dropdown">
@@ -73,6 +128,7 @@
                             {% endif %}
                             <div class="result-info">
                                 <h4><a href="{% static result.page_file %}">{{ result.page_title }}</a></h4>
+                                <p>Сайт: <a href="{% url 'site' result.site.site_id %}">{{ result.site.site_link }}</a></p>
                                 <p>Оригинальная ссылка: <a href="{{ result.page_link }}">{{ result.page_link }}</a></p>
                                 {% if result.search_headline %}<p>{{ result.search_headline|safe }}</p>{% endif %}
                             </div>
@@ -102,7 +158,10 @@
                             </div>
                             <div class="result-info">
                                 <h4><a href="{% static result.file_path %}">{{ result.file_link }}</a></h4>
+                                <p>Cайт: <a href="{% url 'site' result.page.site.site_id %}">{{ result.page.site.site_link }}</a></p>
+                                <p>Cтраница: {{ result.page.page_link }}</p>
                                 <p>Оригинальная ссылка: <a href="{{ result.file_link }}">{{ result.file_link }}</a></p>
+                                {% if result.search_headline %}<p>{{ result.search_headline|safe }}</p>{% endif %}
                             </div>
                         </li>
                     {% endif %}
@@ -111,8 +170,8 @@
             <div class="pagination">
                 <span class="step-links">
                     {% if page_obj.has_previous %}
-                        <a href="?search_type={{ search_type }}&entries={{ entries_per_page }}&site_link={{ site_link_query }}&page_link={{ page_link_query }}&page_title={{ page_title_query }}&page_text={{ page_text_query }}&file_link={{ file_link_query }}&file_extension={{ file_extension_query }}&page=1">&laquo; Первая страница</a>
-                        <a href="?search_type={{ search_type }}&entries={{ entries_per_page }}&site_link={{ site_link_query }}&page_link={{ page_link_query }}&page_title={{ page_title_query }}&page_text={{ page_text_query }}&file_link={{ file_link_query }}&file_extension={{ file_extension_query }}&page={{ page_obj.previous_page_number }}">Предыдущая страница</a>
+                        <a href="?search_type={{ search_type }}&entries={{ entries_per_page }}&site_link={{ site_link_query }}&page_title={{ page_title_query }}&page_text={{ page_text_query }}&file_link={{ file_link_query }}&file_extension={{ file_extension_query }}&pages_more_than={{ pages_more_than }}&pages_less_than={{ pages_less_than }}&document_text={{ doc_text_query }}&image_height_more_than={{ image_height_more_than }}&image_height_less_than={{ image_height_less_than }}&image_width_more_than={{ image_width_more_than }}&image_width_less_than={{ image_width_less_than }}&device_make={{ device_make }}&device_model={{ device_model }}&date_from={{ date_from }}&date_to={{ date_to }}&page=1">&laquo; Первая страница</a>
+                        <a href="?search_type={{ search_type }}&entries={{ entries_per_page }}&site_link={{ site_link_query }}&page_title={{ page_title_query }}&page_text={{ page_text_query }}&file_link={{ file_link_query }}&file_extension={{ file_extension_query }}&pages_more_than={{ pages_more_than }}&pages_less_than={{ pages_less_than }}&document_text={{ doc_text_query }}&image_height_more_than={{ image_height_more_than }}&image_height_less_than={{ image_height_less_than }}&image_width_more_than={{ image_width_more_than }}&image_width_less_than={{ image_width_less_than }}&device_make={{ device_make }}&device_model={{ device_model }}&date_from={{ date_from }}&date_to={{ date_to }}&page={{ page_obj.previous_page_number }}">Предыдущая страница</a>
                     {% endif %}
             
                     <span class="current">
@@ -120,8 +179,8 @@
                     </span>
             
                     {% if page_obj.has_next %}
-                        <a href="?search_type={{ search_type }}&entries={{ entries_per_page }}&site_link={{ site_link_query }}&page_link={{ page_link_query }}&page_title={{ page_title_query }}&page_text={{ page_text_query }}&file_link={{ file_link_query }}&file_extension={{ file_extension_query }}&page={{ page_obj.next_page_number }}">Следующая страница</a>
-                        <a href="?search_type={{ search_type }}&entries={{ entries_per_page }}&site_link={{ site_link_query }}&page_link={{ page_link_query }}&page_title={{ page_title_query }}&page_text={{ page_text_query }}&file_link={{ file_link_query }}&file_extension={{ file_extension_query }}&page={{ page_obj.paginator.num_pages }}">Последняя страница &raquo;</a>
+                        <a href="?search_type={{ search_type }}&entries={{ entries_per_page }}&site_link={{ site_link_query }}&page_title={{ page_title_query }}&page_text={{ page_text_query }}&file_link={{ file_link_query }}&file_extension={{ file_extension_query }}&pages_more_than={{ pages_more_than }}&pages_less_than={{ pages_less_than }}&document_text={{ doc_text_query }}&image_height_more_than={{ image_height_more_than }}&image_height_less_than={{ image_height_less_than }}&image_width_more_than={{ image_width_more_than }}&image_width_less_than={{ image_width_less_than }}&device_make={{ device_make }}&device_model={{ device_model }}&date_from={{ date_from }}&date_to={{ date_to }}&page={{ page_obj.next_page_number }}">Следующая страница</a>
+                        <a href="?search_type={{ search_type }}&entries={{ entries_per_page }}&site_link={{ site_link_query }}&page_title={{ page_title_query }}&page_text={{ page_text_query }}&file_link={{ file_link_query }}&file_extension={{ file_extension_query }}&pages_more_than={{ pages_more_than }}&pages_less_than={{ pages_less_than }}&document_text={{ doc_text_query }}&image_height_more_than={{ image_height_more_than }}&image_height_less_than={{ image_height_less_than }}&image_width_more_than={{ image_width_more_than }}&image_width_less_than={{ image_width_less_than }}&device_make={{ device_make }}&device_model={{ device_model }}&date_from={{ date_from }}&date_to={{ date_to }}&page={{ page_obj.paginator.num_pages }}">Последняя страница &raquo;</a>
                     {% endif %}
                 </span>
             </div>

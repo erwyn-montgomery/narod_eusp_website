@@ -56,14 +56,6 @@
     margin-left: 8px;
 }
 
-.file-extension-label {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    margin-bottom: 8px;
-    font-size: 12px;
-}
-
 .search-button-container {
     display: flex;
     justify-content: flex-start;
@@ -118,4 +110,90 @@
 .entries-dropdown {
     margin-top: 20px;
     font-size: 16px;
+}
+
+/* Adjusted width for short inputs */
+.short-input {
+    width: 20%;
+    min-width: 30px;
+}
+
+/* New class for wider selects */
+.wide-select {
+    width: 55%;
+}
+
+.file-extension-label, .form-inline, .form-group {
+    margin-bottom: 8px;
+}
+
+.hidden-checkbox {
+    display: none;
+}
+
+.additional-filters {
+    display: none;
+    margin-top: 10px;
+    width: 100%; /* Align width with other inputs */
+}
+
+.hidden-checkbox:checked + .additional-filters {
+    display: block;
+}
+
+.toggle-label {
+    cursor: pointer;
+    color: blue;
+    text-decoration: underline;
+    display: inline-block;
+    margin-bottom: 10px;
+    font-size: 12px;
+}
+
+.form-group {
+    margin-bottom: 8px;
+    width: 100%; /* Full width for consistency */
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 12px; /* Match other labels */
+    color: #333;
+}
+
+.form-inline {
+    display: flex;
+    align-items: center;
+}
+
+.form-inline label {
+    margin-right: 8px;
+}
+
+.form-inline input, .form-inline select {
+    margin-right: 8px;
+}
+
+.form-inline .search-input, .form-inline .search-select {
+    width: auto;
+    flex: 1;
+}
+
+.inline-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.inline-group label {
+    margin-right: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.form-group span {
+    display: flex;
+    align-items: center;
+    margin: 0 10px;
 }

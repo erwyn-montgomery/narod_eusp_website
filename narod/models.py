@@ -149,7 +149,7 @@ class ExternalLink(models.Model):
 class File(models.Model):
     file_id = models.BigIntegerField(primary_key=True)
     page = models.ForeignKey('Page', on_delete=models.CASCADE, related_name="files_on_page")
-    file_extension = models.TextField(blank=True, null=True)
+    file_extension = models.CharField(max_length=5, blank=True, null=True)
     file_link = models.URLField(blank=True, null=True)
     file_saved = models.BooleanField(default=False)
     file_path = models.TextField(blank=True, null=True)
@@ -165,8 +165,8 @@ class FileMetaInfo(models.Model):
     file_meta_id = models.BigIntegerField(primary_key=True)
     file = models.ForeignKey(File, on_delete=models.CASCADE, related_name="files")
     size = models.BigIntegerField(blank=True, null=True)
-    size_h = models.TextField(blank=True, null=True)
-    modification_date = models.TextField(blank=True, null=True)
+    size_h = models.CharField(max_length=100, blank=True, null=True)
+    modification_date = models.DateField(blank=True, null=True)
     html_code = models.TextField(blank=True, null=True)
     title = models.TextField(blank=True, null=True)
     author = models.TextField(blank=True, null=True)
@@ -177,12 +177,22 @@ class FileMetaInfo(models.Model):
     word_count = models.BigIntegerField(blank=True, null=True)
     rows = models.BigIntegerField(blank=True, null=True)
     columns = models.BigIntegerField(blank=True, null=True)
-    slides_count = models.BigIntegerField(blank=True, null=True)
-    image_height = models.BigIntegerField(blank=True, null=True)
-    image_width = models.BigIntegerField(blank=True, null=True)
-    image_format = models.TextField(blank=True, null=True)
-    image_mode = models.TextField(blank=True, null=True)
+    slides_count = models.IntegerField(blank=True, null=True)
+    image_height = models.IntegerField(blank=True, null=True)
+    image_width = models.IntegerField(blank=True, null=True)
+    image_format = models.CharField(max_length=100, blank=True, null=True)
+    image_mode = models.CharField(max_length=100, blank=True, null=True)
     exif = models.TextField(blank=True, null=True)
+    exif_make = models.TextField(blank=True, null=True)
+    exif_model = models.TextField(blank=True, null=True)
+    exif_software = models.TextField(blank=True, null=True)
+    exif_orientation = models.SmallIntegerField(blank=True, null=True)
+    exif_datetime = models.DateField(blank=True, null=True)
+    exif_artist = models.TextField(blank=True, null=True)
+    exif_copyright = models.TextField(blank=True, null=True)
+    exif_hostcomputer = models.TextField(blank=True, null=True)
+    file_fts_text = SearchVectorField(blank=True, null=True)
+    file_fts_title = SearchVectorField(blank=True, null=True)
 
     class Meta:
         verbose_name = "Метаинформация файла"
@@ -214,6 +224,7 @@ class Page(models.Model):
     page_file_saved = models.BooleanField(default=False)
     page_file = models.TextField(blank=True, null=True)
     page_fts_text = SearchVectorField(null=True)
+    page_fts_title = SearchVectorField(null=True)
 
     def save(self, *args, **kwargs):
         self.page_fts_text = SearchVector('page_text')
@@ -242,6 +253,7 @@ class PageScreenshot(models.Model):
 class Site(models.Model):
     site_id = models.BigIntegerField(primary_key=True)
     site_link = models.URLField(blank=True, null=True)
+    page_count = models.IntegerField(blank=True, null=True)
 
     class Meta:
         verbose_name = "Сайт"

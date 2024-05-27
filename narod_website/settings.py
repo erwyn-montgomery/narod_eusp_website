@@ -81,7 +81,7 @@ WSGI_APPLICATION = "narod_website.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "narod_test_local",
+        "NAME": "narod_pg_small_sample",
         "USER": "narod_user",
         "PASSWORD": "my_password_for_narod_user2024",
         "HOST": "localhost",
