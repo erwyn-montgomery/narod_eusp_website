@@ -12,82 +12,89 @@
     </div>
     <div>
         <form action="{% url 'advanced_search_results' %}" method="get" class="search-form">
-            <div class="search-options">
-                <label class="search-label">Поиск среди</label>
-                <label class="search-label">
-                    <input type="radio" name="search_type" value="site" class="search-radio" {% if search_type == 'site' %}checked{% endif %}>
-                    сайтов
-                </label>
-                <label class="search-label">
-                    <input type="radio" name="search_type" value="page" class="search-radio" {% if search_type == 'page' or search_type != 'site' and search_type != 'file' %}checked{% endif %}>
-                    страниц
-                </label>
-                <label class="search-label">
-                    <input type="radio" name="search_type" value="file" class="search-radio" {% if search_type == 'file' %}checked{% endif %}>
-                    файлов
-                </label>
+            <div>
+                <label for="type_site" class="section-title">Поиск по сайтам</label>
+                <input type="radio" name="search_type" id="type_site" value="site">
+                <div class="section">
+                    <div class="search-controls">
+                        <input type="text" name="site_link" placeholder="Поиск по ссылкам сайтов" class="search-input" value="{{ site_link_query }}">
+                    </div>
+                    <div class="form-group form-inline">
+                        <label for="pages_more_than">Количество страниц на сайте:</label>
+                        <input type="number" id="pages_more_than" name="pages_more_than" class="search-input short-input" placeholder="число">
+                        <span> ≤ &nbsp; число страниц &nbsp; ≤ </span>
+                        <input type="number" id="pages_less_than" name="pages_less_than" class="search-input short-input" placeholder="число">
+                    </div>
+                </div>
             </div>
-            <div class="search-controls">
-                <input type="text" name="site_link" placeholder="Поиск по ссылкам сайтов" class="search-input" value="{{ site_link_query }}">
-                <input type="text" name="page_title" placeholder="Поиск по заголовкам страниц" class="search-input" value="{{ page_title_query }}">
-                <input type="text" name="page_text" placeholder="Поиск по тексту страниц" class="search-input" value="{{ page_text_query }}">
-                <input type="text" name="file_link" placeholder="Поиск по ссылкам на файл" class="search-input" value="{{ file_link_query }}">
+            <div>
+                <label for="type_page" class="section-title">Поиск по страницам</label>
+                <input type="radio" name="search_type" id="type_page" value="page">
+                <div class="section">
+                    <div class="search-controls">
+                        <input type="text" name="page_title" placeholder="Поиск по заголовкам страниц" class="search-input" value="{{ page_title_query }}">
+                        <input type="text" name="page_text" placeholder="Поиск по тексту страниц" class="search-input" value="{{ page_text_query }}">
+                    </div>
+                </div>
             </div>
-            <div class="form-group form-inline">
-                <label for="pages_more_than">Количество страниц на сайте:</label>
-                <input type="number" id="pages_more_than" name="pages_more_than" class="search-input short-input" placeholder="число">
-                <span> ≤ &nbsp; число страниц &nbsp; ≤ </span>
-                <input type="number" id="pages_less_than" name="pages_less_than" class="search-input short-input" placeholder="число">
-            </div>
-            <div class="form-group">
-                <label class="file-extension-label">Расширение файла
-                    <select name="file_extension" class="search-select">
-                        <option value="">любое</option>
-                        {% for extension in file_extensions %}
-                            <option value="{{ extension }}" {% if extension != None and extension == file_extension_query %}selected{% endif %}>{{ extension }}</option>
-                        {% endfor %}
-                    </select>
-                </label>
-            </div>
-            <div class="form-group">
-                <input type="text" id="document_text" name="document_text" placeholder="Поиск по тексту документов" class="search-input">
-            </div>
-            <div class="form-group form-inline">
-                <label for="image_height">Высота изображения в пикселях:</label>
-                <input type="number" id="image_height_more_than" name="image_height_more_than" class="search-input short-input" placeholder="число">
-                <span> ≤ высота ≤ </span>
-                <input type="number" id="image_height_less_than" name="image_height_less_than" class="search-input short-input" placeholder="число">
-            </div>
-            <div class="form-group form-inline">
-                <label for="image_width">Ширина изображения в пикселях:</label>
-                <input type="number" id="image_width_more_than" name="image_width_more_than" class="search-input short-input" placeholder="число">
-                <span> ≤ ширина ≤ </span>
-                <input type="number" id="image_width_less_than" name="image_width_less_than" class="search-input short-input" placeholder="число">
-            </div>
-            <div class="form-group">
-                <label for="device_make">Бренд устройства съемки (для поиска по изображениям)</label>
-                <select id="device_make" name="device_make" class="search-select">
-                    <option value="">любой</option>
-                    {% for make in exif_makes %}
-                            <option value="{{ make }}">{{ make }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="device_model">Модель устройства съемки (для поиска по изображениям)</label>
-                <select id="device_model" name="device_model" class="search-select">
-                    <option value="">любая</option>
-                    {% for model in exif_models %}
-                            <option value="{{ make }}">{{ model }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group form-inline">
-                <label for="date_from">Дата съемки (для поиска по изображениям)</label>
-                <label for="date_from">с</label>
-                <input type="date" id="date_from" name="date_from" class="search-input">
-                <label for="date_to">по</label>
-                <input type="date" id="date_to" name="date_to" class="search-input">
+            <div>
+                <label for="type_file" class="section-title">Поиск по файлам</label>
+                <input type="radio" name="search_type" id="type_file" value="file">
+                <div class="section">
+                    <div class="search-controls">
+                        <input type="text" name="file_link" placeholder="Поиск по ссылкам на файл" class="search-input" value="{{ file_link_query }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="file-extension-label">Расширение файла
+                            <select name="file_extension" class="search-select">
+                                <option value="">любое</option>
+                                {% for extension in file_extensions %}
+                                    <option value="{{ extension }}" {% if extension != None and extension == file_extension_query %}selected{% endif %}>{{ extension }}</option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="document_text" name="document_text" placeholder="Поиск по тексту документов" class="search-input">
+                    </div>
+                    <div class="form-group form-inline">
+                        <label for="image_height">Высота изображения в пикселях:</label>
+                        <input type="number" id="image_height_more_than" name="image_height_more_than" class="search-input short-input" placeholder="число">
+                        <span> ≤ высота ≤ </span>
+                        <input type="number" id="image_height_less_than" name="image_height_less_than" class="search-input short-input" placeholder="число">
+                    </div>
+                    <div class="form-group form-inline">
+                        <label for="image_width">Ширина изображения в пикселях:</label>
+                        <input type="number" id="image_width_more_than" name="image_width_more_than" class="search-input short-input" placeholder="число">
+                        <span> ≤ ширина ≤ </span>
+                        <input type="number" id="image_width_less_than" name="image_width_less_than" class="search-input short-input" placeholder="число">
+                    </div>
+                    <div class="form-group">
+                        <label for="device_make">Бренд устройства съемки (для поиска по изображениям)</label>
+                        <select id="device_make" name="device_make" class="search-select">
+                            <option value="">любой</option>
+                            {% for make in exif_makes %}
+                                    <option value="{{ make }}">{{ make }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="device_model">Модель устройства съемки (для поиска по изображениям)</label>
+                        <select id="device_model" name="device_model" class="search-select">
+                            <option value="">любая</option>
+                            {% for model in exif_models %}
+                                    <option value="{{ make }}">{{ model }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group form-inline">
+                        <label for="date_from">Дата съемки (для поиска по изображениям)</label>
+                        <label for="date_from">с</label>
+                        <input type="date" id="date_from" name="date_from" class="search-input">
+                        <label for="date_to">по</label>
+                        <input type="date" id="date_to" name="date_to" class="search-input">
+                    </div>
+                </div>
             </div>
             <div class="search-button-container">
                 <input type="submit" value="Поиск" class="search-button">

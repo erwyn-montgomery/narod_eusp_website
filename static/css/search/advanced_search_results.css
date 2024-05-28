@@ -1,7 +1,7 @@
 .search-form {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     font-size: 10px;
 }
 
@@ -194,4 +194,32 @@
     display: flex;
     align-items: center;
     margin: 0 10px;
+}
+
+.section-title {
+    display: block;
+    width: 100%;
+    background: #f0f0f0;
+    padding: 10px;
+    border: 1px solid #ccc;
+    margin: 10px 0;
+    cursor: pointer;
+    text-align: center;
+}
+
+.section {
+    display: none;
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+input[type="radio"]:checked + .section {
+    display: block;
+}
+
+input[type="radio"] {
+    display: none;
 }
