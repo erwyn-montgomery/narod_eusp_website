@@ -133,7 +133,7 @@
                                 <h4><a href="{% static result.page_file %}">{{ result.page_title }}</a></h4>
                                 <p>Сайт: <a href="{% url 'site' result.site.site_id %}">{{ result.site.site_link }}</a></p>
                                 <p>Оригинальная ссылка: <a href="{{ result.page_link }}">{{ result.page_link }}</a></p>
-                                {% if result.search_headline %}<p>{{ result.search_headline|safe }}</p>{% endif %}
+                                {% if result.headline %}<p>{{ result.headline|safe }}</p>{% endif %}
                             </div>
                         </li>
                     {% elif result|get_model_name == 'site' %}
