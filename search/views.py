@@ -93,6 +93,7 @@ class AdvancedSearchResultsView(View):
 
     def get(self, request, *args, **kwargs):
         site_link_query = request.GET.get("site_link", "").strip()
+        page_link_query = request.GET.get("page_link", "").strip()
         page_title_query = request.GET.get("page_title", "").strip()
         page_text_query = request.GET.get("page_text", "").strip()
         file_link_query = request.GET.get("file_link", "").strip()
@@ -112,7 +113,7 @@ class AdvancedSearchResultsView(View):
         search_page = request.GET.get("page", 1)
         entries_per_page = request.GET.get("entries", 20)
 
-        cache_key = f'queryset_{hash(f"{site_link_query}_{page_title_query}_{page_text_query}_{file_link_query}_{file_extension_query}_{search_type}_{pages_more_than}_{pages_less_than}_{doc_text_query}_{image_height_more_than}_{image_height_less_than}_{image_width_more_than}_{image_width_less_than}_device_make={device_make}_{device_model}_{str(date_from)}_{str(date_to)}")}'
+        cache_key = f'queryset_{hash(f"{site_link_query}_{page_link_query}_{page_title_query}_{page_text_query}_{file_link_query}_{file_extension_query}_{search_type}_{pages_more_than}_{pages_less_than}_{doc_text_query}_{image_height_more_than}_{image_height_less_than}_{image_width_more_than}_{image_width_less_than}_device_make={device_make}_{device_model}_{str(date_from)}_{str(date_to)}")}'
         search_results = cache.get(cache_key)
 
         if not search_results:
@@ -124,6 +125,7 @@ class AdvancedSearchResultsView(View):
                 )
             elif search_type == "page":
                 search_results = self.search_page(
+                    page_link_query = page_link_query,
                     page_title_query = page_title_query,
                     page_text_query = page_text_query
                 )
@@ -163,6 +165,7 @@ class AdvancedSearchResultsView(View):
             "exif_models": exif_models,
             "entries_per_page": entries_per_page,
             "site_link_query": site_link_query,
+            "page_link_query": page_link_query,
             "page_title_query": page_title_query,
             "page_text_query": page_text_query,
             "file_link_query": file_link_query,
@@ -205,31 +208,49 @@ class AdvancedSearchResultsView(View):
         return qs_filtered
 
     def search_page(self, *args, **kwargs):
-        fts_title_results = self.page_model.none()
-        fts_text_results = self.page_model.none() 
-        if kwargs.get("page_title_query"):
-            fts_title_query = SearchQuery(kwargs["page_title_query"], config="russian")
-            fts_title_results = self.page_model.annotate(
-                rank=SearchRank(F("page_fts_title"), fts_title_query)
-            ).filter(
+        page_link_query = kwargs.get("page_link_query", "")
+        page_title_query = kwargs.get("page_title_query")
+        page_text_query = kwargs.get("page_text_query")
+        filters = Q()
+        if page_link_query:
+            page_link_filter = Q(page_link_similarity__gt=0.05)
+            filters &= page_link_filter
+        if page_title_query:
+            fts_title_query = SearchQuery(page_title_query, config="russian")
+            title_filter = Q(
                 page_fts_title=fts_title_query,
                 rank__gt=0.05
-            ).order_by("-rank").distinct()
-        if kwargs.get("page_text_query"):
-            fts_text_query = SearchQuery(kwargs["page_text_query"], config="russian")
-            fts_text_results = self.page_model.annotate(
-                rank=SearchRank(F("page_fts_text"), fts_text_query),
-                headline=SearchHeadline("page_text", fts_text_query, config="russian")
-            ).filter(
+            )
+            filters &= title_filter
+        if page_text_query:
+            fts_text_query = SearchQuery(page_text_query, config="russian")
+            text_filter = Q(
                 page_fts_text=fts_text_query,
                 rank__gt=0.05
-            ).order_by("-rank").distinct()
-        combined_results = sorted(
-            chain(fts_title_results, fts_text_results),
-            key=lambda instance: instance.rank,
-            reverse=True
+            )
+            filters &= text_filter
+        if filters == Q():
+            return self.page_model.none()
+        qs_annotated = self.page_model.annotate(
+            rank=Coalesce(
+                SearchRank(F("page_fts_title"), fts_title_query) if page_title_query else Value(0.0, output_field=FloatField())
+                + SearchRank(F("page_fts_text"), fts_text_query) if page_text_query else Value(0.0, output_field=FloatField()),
+                Value(0.0),
+                output_field=FloatField()
+            ),
+            headline=Coalesce(
+                SearchHeadline("page_text", fts_text_query, config="russian") if page_text_query else Value("", output_field=TextField()),
+                Value(""),
+                output_field=TextField()
+            ),
+            page_link_similarity=Coalesce(
+                TrigramSimilarity('page_link', page_link_query),
+                Value(0.0),
+                output_field=FloatField()
+            )
         )
-        return combined_results
+        qs_filtered = qs_annotated.filter(filters).order_by("-rank", "-page_link_similarity").distinct()
+        return qs_filtered
 
     def search_file(self, *args, **kwargs):
         fts_query = None    
@@ -303,6 +324,6 @@ class AdvancedSearchResultsView(View):
             date_filter
         ).distinct().order_by(
             "-file_link_similarity", "-search_rank"
-        ) 
+        )
         return qs_filtered
     
